@@ -19,7 +19,7 @@ func main() {
 		fmt.Println(err, ": command not found")
 		os.Exit(1)
 	} else {
-		fmt.Println("Command entered: ", command)
+		fmt.Println(command, ": command not found")
 	}
 
 }
