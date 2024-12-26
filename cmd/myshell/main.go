@@ -4,16 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 )
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
-
-	// Regular expression to match "exit X" where X is a number
-	exitPattern := regexp.MustCompile(`^exit (\d+)$`)
 
 	for {
 		fmt.Fprint(os.Stdout, "$ ")
@@ -27,19 +23,33 @@ func main() {
 		// Trim the newline character from the command
 		command = strings.TrimSpace(command)
 
-		if matches := exitPattern.FindStringSubmatch(command); matches != nil {
-			// Convert the exit code to an integer
-			exitCode, err := strconv.Atoi(matches[1])
-			if err != nil {
-				fmt.Fprintln(os.Stderr, "Invalid exit code:", matches[1])
-				continue
-			}
+		// extract the first argument from the command
+		parts := strings.Fields(command)
+		if len(parts) == 0 {
+			continue
+		}
+		command = parts[0]
 
-			// Exit with the specified code
-			os.Exit(exitCode)
+		switch command {
+		case "exit":
+			if len(parts) > 1 {
+				exitCode, err := strconv.Atoi(parts[1])
+				if err != nil {
+					fmt.Fprintln(os.Stderr, "Invalid exit code:", parts[1])
+					continue
+				}
+
+				// Exit with the specified code
+				os.Exit(exitCode)
+			} else {
+				// Exit with code 0
+				os.Exit(0)
+			}
+		case "echo":
+			fmt.Println(strings.Join(parts[1:], " "))
+		default:
+			fmt.Println(command + ": command not found")
 		}
 
-		// Handle all other commands
-		fmt.Println(command + ": command not found")
 	}
 }
