@@ -49,10 +49,27 @@ func main() {
 			fmt.Println(strings.Join(parts[1:], " "))
 		case "type":
 			switch parts[1] {
-			case "exit", "echo", "type":
+			case "echo", "exit", "type":
 				fmt.Println(parts[1] + " is a shell builtin")
 			default:
-				fmt.Println(parts[1] + ": not found")
+				path, exists := os.LookupEnv("PATH")
+				if !exists {
+					fmt.Fprintln(os.Stderr, "PATH environment variable not set")
+				} else {
+					found := false
+					paths := strings.Split(path, ":")
+					for _, p := range paths {
+						_, err := os.Stat(p + "/" + parts[1])
+						if err == nil {
+							fmt.Println(parts[1] + " is " + p + "/" + parts[1])
+							found = true
+							break
+						}
+					}
+					if !found {
+						fmt.Println(parts[1] + ": not found")
+					}
+				}
 			}
 		default:
 			fmt.Println(command + ": command not found")
